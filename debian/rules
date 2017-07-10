@@ -22,13 +22,17 @@ export BUILD_DATE=$(shell LC_ALL=C date -u "+%B %d, %Y" -d "$(LAST_CHANGE)")
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
 
+export PYBUILD_DISABLE_python3.3=test
+export PYBUILD_DISABLE_python3.5=test
+export PYBUILD_DISABLE_python3.6=test
+
 %:
-	dh $@ --with python2
+	dh $@ --with python3 --buildsystem=pybuild
 
 override_dh_auto_build:
 	cp etc/lava-slave.init debian/lava-dispatcher.lava-slave.init
 	dh_auto_build
-	python setup.py build
+	python3 setup.py build
 	make -C man/ man SPHINXOPTS="-D today=\"$(BUILD_DATE)\""
 
 override_dh_auto_install:
@@ -36,26 +40,26 @@ override_dh_auto_install:
 	dh_installman -plava-dispatcher man/_build/man/lava-dispatch.1
 	dh_installman -plava-dispatcher man/_build/man/lava-slave.8
 	dh_installinit --name lava-slave
-	python setup.py install --root=$(CURDIR)/debian/lava-dispatcher/ --install-layout=deb
+	python3 setup.py install --root=$(CURDIR)/debian/lava-dispatcher/ --install-layout=deb
 	$(RM) debian/lava-dispatcher/etc/init.d/lava-slave.init
 	mv -v debian/lava-dispatcher/usr/bin/lava-dispatch debian/lava-dispatcher/usr/sbin/
 
 override_dh_fixperms:
-	dh_fixperms -X debian/lava-dispatcher/usr/lib/python2.7/dist-packages/lava_dispatcher/device/dynamic_vm_keys/lava
+	dh_fixperms -X debian/lava-dispatcher/usr/lib/python3/dist-packages/lava_dispatcher/device/dynamic_vm_keys/lava
 	# vm_groups use a shared private key - use the same location for debian & ubuntu
-	chmod 0600 debian/lava-dispatcher/usr/lib/python2.7/dist-packages/lava_dispatcher/device/dynamic_vm_keys/lava
-	chmod 0644 debian/lava-dispatcher/usr/lib/python2.7/dist-packages/lava_dispatcher/device/dynamic_vm_keys/lava.pub
+	chmod 0600 debian/lava-dispatcher/usr/lib/python3/dist-packages/lava_dispatcher/device/dynamic_vm_keys/lava
+	chmod 0644 debian/lava-dispatcher/usr/lib/python3/dist-packages/lava_dispatcher/device/dynamic_vm_keys/lava.pub
 
 override_dh_auto_clean:
 	dh_auto_clean
 	$(RM) -r lava_dispatcher.egg-info setup.cfg .idea/
-	$(RM) -r versiontools-*.egg/ doc/build/ doc/html/
+	$(RM) -r .eggs/ versiontools-*.egg/ doc/build/ doc/html/
 	[ ! -f man/Makefile ] || make -C man/ clean
 
 # get upstream version for get-orig-source target
 VERSION:= $(shell dpkg-parsechangelog | grep '^Version: ' | sed -e 's/^Version: //' | sed -e 's/\-.*$$//')
 
 sdist-orig:
-	python setup.py sdist
+	python3 setup.py sdist
 	mv -v dist/lava-dispatcher-$(VERSION)*.tar.gz ../lava-dispatcher_$(VERSION).orig.tar.gz
 	$(RM) -r versiontools-*.egg/
