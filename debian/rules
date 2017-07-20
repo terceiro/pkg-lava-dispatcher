@@ -27,7 +27,7 @@ export PYBUILD_DISABLE_python3.5=test
 export PYBUILD_DISABLE_python3.6=test
 
 %:
-	dh $@ --with python3 --buildsystem=pybuild
+	dh $@ --with python2,python3
 
 override_dh_auto_build:
 	cp etc/lava-slave.init debian/lava-dispatcher.lava-slave.init
@@ -52,7 +52,7 @@ override_dh_fixperms:
 
 override_dh_auto_clean:
 	dh_auto_clean
-	$(RM) -r lava_dispatcher.egg-info setup.cfg .idea/
+	$(RM) -r lava_dispatcher.egg-info setup.cfg .idea/ build/
 	$(RM) -r .eggs/ versiontools-*.egg/ doc/build/ doc/html/
 	[ ! -f man/Makefile ] || make -C man/ clean
 
