@@ -44,7 +44,7 @@ Description: Linaro Automated Validation Architecture dispatcher
  .
  This package provides lava-dispatcher to dispatch
  LAVA jobs to configured devices using Python3 with
-Python2 support for LAVA V1.
+ Python2 support for LAVA V1.
  .
  A range of devices are supported for ARM and
  x86 architectures.
